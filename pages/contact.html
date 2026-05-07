@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — Rohan Jasani</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/pages.css" />
+</head>
+<body>
+
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Nav -->
+  <nav>
+    <a href="../index.html" class="nav-logo">Rohan</a>
+    <ul class="nav-links">
+      <li><a href="work.html">Work</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="../index.html#services">Services</a></li>
+      <li><a href="contact.html" style="opacity:1;">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Page Hero -->
+  <header class="page-hero">
+    <div class="page-hero-inner">
+      <p class="hero-label">Get In Touch</p>
+      <h1 class="page-hero-title">Contact</h1>
+    </div>
+    <p class="page-hero-sub">Whether you have a project, a question, or just want to say hello — the inbox is open.</p>
+  </header>
+
+  <main class="contact-main">
+
+    <!-- Left: info -->
+    <div class="contact-info fade-in">
+      <div class="contact-info-block">
+        <p class="contact-info-label">Email</p>
+        <a href="mailto:rohan@example.com" class="contact-info-value">rohan@example.com</a>
+      </div>
+      <div class="contact-info-block">
+        <p class="contact-info-label">Social</p>
+        <a href="#" class="contact-info-value">LinkedIn</a>
+        <a href="#" class="contact-info-value">Dribbble</a>
+        <a href="#" class="contact-info-value">Instagram</a>
+      </div>
+      <div class="contact-info-block">
+        <p class="contact-info-label">Availability</p>
+        <p class="contact-info-value contact-available">
+          <span class="availability-dot"></span>
+          Open to new projects — Q3 2026
+        </p>
+      </div>
+      <div class="contact-info-block">
+        <p class="contact-info-label">Based in</p>
+        <p class="contact-info-value">Chicago, IL · Remote-first</p>
+      </div>
+    </div>
+
+    <!-- Right: form -->
+    <form class="contact-form fade-in" onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="name">Your Name</label>
+          <input class="form-input" type="text" id="name" name="name" placeholder="Jane Smith" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input class="form-input" type="email" id="email" name="email" placeholder="jane@company.com" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="subject">What's this about?</label>
+        <select class="form-input form-select" id="subject" name="subject">
+          <option value="" disabled selected>Select a topic</option>
+          <option>Brand Identity Project</option>
+          <option>UX / Product Design</option>
+          <option>Design System</option>
+          <option>Art Direction</option>
+          <option>General Enquiry</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="budget">Approximate Budget</label>
+        <select class="form-input form-select" id="budget" name="budget">
+          <option value="" disabled selected>Select a range</option>
+          <option>Under $5,000</option>
+          <option>$5,000 – $15,000</option>
+          <option>$15,000 – $50,000</option>
+          <option>$50,000+</option>
+          <option>Let's discuss</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="message">Tell me about your project</label>
+        <textarea class="form-input form-textarea" id="message" name="message" placeholder="Share as much or as little as you like — timeline, goals, context..." required></textarea>
+      </div>
+      <button class="form-submit" type="submit">
+        <span class="form-submit-text">Send Message</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <p class="form-note" id="form-success" style="display:none;">Thanks — I'll be in touch within 48 hours.</p>
+    </form>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <span class="footer-copy">© 2026 Rohan Jasani — All rights reserved</span>
+    <a href="../index.html" class="footer-back">← Back to Home</a>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script>
+    function handleSubmit(e) {
+      e.preventDefault();
+      document.querySelector('.form-submit-text').textContent = 'Sent!';
+      document.getElementById('form-success').style.display = 'block';
+      e.target.querySelectorAll('input, textarea, select, button').forEach(el => el.disabled = true);
+    }
+  </script>
+</body>
+</html>
