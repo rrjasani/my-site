@@ -5,6 +5,127 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rohan — Designer</title>
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Weather Widget ── */
+    #hero { position: relative; }
+
+    #weather-widget {
+      position: absolute;
+      top: 100px;
+      right: 60px;
+      width: 220px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 24px 26px;
+      z-index: 10;
+      transition: opacity 0.4s, transform 0.4s;
+    }
+
+    #weather-widget.loading {
+      opacity: 0.4;
+    }
+
+    .weather-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .weather-emoji {
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+
+    .weather-temp {
+      font-family: 'Georgia', serif;
+      font-size: 2.4rem;
+      font-weight: 400;
+      font-style: italic;
+      color: #c8ff00;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .weather-condition {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(245,242,238,0.55);
+      margin-bottom: 18px;
+    }
+
+    .weather-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+      margin-bottom: 14px;
+    }
+
+    .weather-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .weather-location {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(245,242,238,0.35);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
+    }
+
+    .weather-time {
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: rgba(245,242,238,0.25);
+      white-space: nowrap;
+    }
+
+    .weather-extra {
+      display: flex;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .weather-extra-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .weather-extra-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(245,242,238,0.25);
+    }
+
+    .weather-extra-val {
+      font-size: 0.78rem;
+      color: rgba(245,242,238,0.6);
+    }
+
+    .weather-error {
+      font-size: 0.72rem;
+      color: rgba(245,242,238,0.3);
+      letter-spacing: 0.06em;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      #weather-widget {
+        position: static;
+        width: auto;
+        margin: 0 24px 32px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -24,6 +145,35 @@
 
   <!-- Hero -->
   <section id="hero">
+
+    <!-- Weather Widget -->
+    <div id="weather-widget" class="loading" aria-label="Current weather">
+      <div class="weather-top">
+        <span class="weather-emoji" id="w-emoji">⋯</span>
+        <span class="weather-temp" id="w-temp">--°</span>
+      </div>
+      <p class="weather-condition" id="w-condition">Fetching weather…</p>
+      <div class="weather-divider"></div>
+      <div class="weather-footer">
+        <span class="weather-location" id="w-location">Locating…</span>
+        <span class="weather-time" id="w-time"></span>
+      </div>
+      <div class="weather-extra" id="w-extra" style="display:none">
+        <div class="weather-extra-item">
+          <span class="weather-extra-label">Humidity</span>
+          <span class="weather-extra-val" id="w-humidity">--%</span>
+        </div>
+        <div class="weather-extra-item">
+          <span class="weather-extra-label">Wind</span>
+          <span class="weather-extra-val" id="w-wind">-- mph</span>
+        </div>
+        <div class="weather-extra-item">
+          <span class="weather-extra-label">Feels like</span>
+          <span class="weather-extra-val" id="w-feels">--°</span>
+        </div>
+      </div>
+    </div>
+
     <div class="hero-content">
       <p class="hero-label">Designer &amp; Creative Director</p>
       <h1 class="hero-title">
@@ -210,5 +360,114 @@
   </footer>
 
   <script src="js/main.js"></script>
+  <script>
+    /* ── Weather Widget ── */
+    (function () {
+      const WMO = {
+        0:  { label: 'Clear Sky',          emoji: '☀️'  },
+        1:  { label: 'Mainly Clear',        emoji: '🌤️' },
+        2:  { label: 'Partly Cloudy',       emoji: '⛅'  },
+        3:  { label: 'Overcast',            emoji: '☁️'  },
+        45: { label: 'Foggy',               emoji: '🌫️' },
+        48: { label: 'Icy Fog',             emoji: '🌫️' },
+        51: { label: 'Light Drizzle',       emoji: '🌦️' },
+        53: { label: 'Drizzle',             emoji: '🌦️' },
+        55: { label: 'Heavy Drizzle',       emoji: '🌧️' },
+        56: { label: 'Freezing Drizzle',    emoji: '🌨️' },
+        57: { label: 'Heavy Freezing Drizzle', emoji: '🌨️' },
+        61: { label: 'Light Rain',          emoji: '🌧️' },
+        63: { label: 'Rain',                emoji: '🌧️' },
+        65: { label: 'Heavy Rain',          emoji: '🌧️' },
+        66: { label: 'Freezing Rain',       emoji: '🌨️' },
+        67: { label: 'Heavy Freezing Rain', emoji: '🌨️' },
+        71: { label: 'Light Snow',          emoji: '🌨️' },
+        73: { label: 'Snow',                emoji: '❄️'  },
+        75: { label: 'Heavy Snow',          emoji: '❄️'  },
+        77: { label: 'Snow Grains',         emoji: '❄️'  },
+        80: { label: 'Light Showers',       emoji: '🌦️' },
+        81: { label: 'Showers',             emoji: '🌧️' },
+        82: { label: 'Heavy Showers',       emoji: '⛈️'  },
+        85: { label: 'Snow Showers',        emoji: '🌨️' },
+        86: { label: 'Heavy Snow Showers',  emoji: '❄️'  },
+        95: { label: 'Thunderstorm',        emoji: '⛈️'  },
+        96: { label: 'Thunderstorm w/ Hail',emoji: '⛈️'  },
+        99: { label: 'Thunderstorm w/ Hail',emoji: '⛈️'  },
+      };
+
+      function wmoLookup(code) {
+        return WMO[code] || { label: 'Unknown', emoji: '🌡️' };
+      }
+
+      function setTime() {
+        const now = new Date();
+        document.getElementById('w-time').textContent =
+          now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      async function fetchWeather(lat, lon) {
+        const url =
+          `https://api.open-meteo.com/v1/forecast` +
+          `?latitude=${lat}&longitude=${lon}` +
+          `&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code` +
+          `&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`;
+
+        const res  = await fetch(url);
+        const data = await res.json();
+        const c    = data.current;
+
+        const { label, emoji } = wmoLookup(c.weather_code);
+
+        document.getElementById('w-emoji').textContent     = emoji;
+        document.getElementById('w-temp').textContent      = Math.round(c.temperature_2m) + '°F';
+        document.getElementById('w-condition').textContent = label;
+        document.getElementById('w-humidity').textContent  = c.relative_humidity_2m + '%';
+        document.getElementById('w-wind').textContent      = Math.round(c.wind_speed_10m) + ' mph';
+        document.getElementById('w-feels').textContent     = Math.round(c.apparent_temperature) + '°F';
+        document.getElementById('w-extra').style.display   = 'flex';
+        document.getElementById('weather-widget').classList.remove('loading');
+      }
+
+      async function fetchLocation(lat, lon) {
+        try {
+          const res  = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+          );
+          const data = await res.json();
+          const a    = data.address;
+          const city = a.city || a.town || a.village || a.county || '';
+          const state = a.state_code || a.state || '';
+          document.getElementById('w-location').textContent =
+            city ? `${city}${state ? ', ' + state : ''}` : 'Your Location';
+        } catch (_) {
+          document.getElementById('w-location').textContent = 'Your Location';
+        }
+      }
+
+      function showError(msg) {
+        const w = document.getElementById('weather-widget');
+        w.innerHTML = `<p class="weather-error">${msg}</p>`;
+        w.classList.remove('loading');
+      }
+
+      if (!navigator.geolocation) {
+        showError('Geolocation not supported.');
+      } else {
+        setTime();
+        setInterval(setTime, 60000);
+
+        navigator.geolocation.getCurrentPosition(
+          async pos => {
+            const { latitude: lat, longitude: lon } = pos.coords;
+            try {
+              await Promise.all([fetchWeather(lat, lon), fetchLocation(lat, lon)]);
+            } catch (e) {
+              showError('Could not load weather.');
+            }
+          },
+          () => showError('Enable location to see your weather.')
+        );
+      }
+    })();
+  </script>
 </body>
 </html>
