@@ -481,6 +481,9 @@
   <script>
     /* ── Weather Widget ── */
     (function () {
+      const WEATHER_CACHE_KEY = 'rj-weather-cache-v1';
+      const WEATHER_CACHE_TTL_MS = 30 * 60 * 1000;
+
       const WMO = {
         0:  { label: 'Clear Sky', emoji: '☀️' },
         1:  { label: 'Mainly Clear', emoji: '🌤️' },
@@ -530,8 +533,63 @@
         }
       };
 
+      const ROTATING_TIPS = [
+        'Pro tip: Mulch before rain so the soil acts more like a sponge and less like a sidewalk.',
+        'Pro tip: Direct downspouts into beds or basins so roof water feeds plants instead of pavement.',
+        'Pro tip: Water deeply and less often; roots follow moisture downward like they are chasing a cooler basement.',
+        'Pro tip: Group thirsty plants together so one deep soak does the work of many light passes.',
+        'Pro tip: Keep bare soil covered with compost or mulch to slow evaporation after rain.',
+        'Pro tip: A shallow basin around a plant helps rainfall pause long enough to sink in.',
+        'Pro tip: If rain is coming, wait and let the sky do the first round of watering for you.',
+        'Pro tip: Healthy soil with compost holds water like a wrung-out towel instead of letting it rush away.',
+        'Pro tip: On slopes, slow water with small contour ridges so it spreads out instead of running off.',
+        'Pro tip: Use drip irrigation near the soil surface so water reaches roots, not the air.',
+        'Pro tip: Check moisture below the surface; the top can look dry while the root zone is still comfortable.',
+        'Pro tip: Put containers where they catch gentle rain but are protected from drying wind.',
+        'Pro tip: Add leaf mold or compost to beds to help them store rain for longer stretches.',
+        'Pro tip: Morning watering loses less to evaporation and gives plants the whole day to use it.',
+        'Pro tip: A rain barrel turns one storm into several future waterings.',
+        'Pro tip: Dense planting shades soil and helps it keep moisture longer between rains.',
+        'Pro tip: If water beads off dry soil, soak slowly in rounds so it has time to enter.',
+        'Pro tip: Clay pots or ollas release water gradually, like a slow IV for thirsty roots.',
+        'Pro tip: Pull weeds before watering; otherwise they drink from the same straw as your plants.',
+        'Pro tip: Pruning a little damaged growth during hot weather can reduce how much water the plant needs.',
+        'Pro tip: Raised beds drain faster, so after light rain they may still need a quick moisture check.',
+        'Pro tip: Keep wood chips off stems and trunks; hold moisture in the soil, not against the plant.',
+        'Pro tip: If a storm is likely, loosen crusted soil lightly so more rain can soak in.',
+        'Pro tip: Reuse cooled cooking water on ornamentals when appropriate instead of sending it down the drain.',
+        'Pro tip: In windy spots, a hedge or trellis can protect soil moisture like a lid on a pot.',
+        'Pro tip: Bigger plants may need slower watering, not just more watering, so the root zone actually gets it.',
+        'Pro tip: After a solid rain, skip guessing and dig a small test hole to see how deep moisture reached.',
+        'Pro tip: Shade cloth over tender crops can reduce water stress during hot dry spells.',
+        'Pro tip: Compost-rich soil buffers both drought and downpours better than tired soil.',
+        'Pro tip: A little water applied twice often sinks deeper than one fast flood that runs away.'
+      ];
+
       let weeklyRainInches = 0;
       let maxRainChance = 0;
+
+      function saveCache(payload) {
+        try {
+          localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({
+            savedAt: Date.now(),
+            payload
+          }));
+        } catch (_) {}
+      }
+
+      function loadCache() {
+        try {
+          const raw = localStorage.getItem(WEATHER_CACHE_KEY);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          if (!parsed || !parsed.savedAt || !parsed.payload) return null;
+          if ((Date.now() - parsed.savedAt) > WEATHER_CACHE_TTL_MS) return null;
+          return parsed.payload;
+        } catch (_) {
+          return null;
+        }
+      }
 
       function wmoLookup(code) {
         return WMO[code] || { label: 'Unknown', emoji: '🌡️' };
@@ -543,6 +601,26 @@
 
       function round(value, digits = 1) {
         return Number(value.toFixed(digits));
+      }
+
+      function chooseTip(tips) {
+        return tips[Math.floor(Math.random() * tips.length)];
+      }
+
+      function getAnalogy(profileKey, amountLabel) {
+        if (profileKey === 'apartment') {
+          return `Think: about ${amountLabel}, like giving each pot a long drink instead of a splash.`;
+        }
+
+        if (profileKey === 'suburban') {
+          return `Think: about ${amountLabel}, like soaking a thick bath towel rather than misting the surface.`;
+        }
+
+        if (profileKey === 'farm') {
+          return `Think: about ${amountLabel}, like one measured refill pass, not an all-day flood.`;
+        }
+
+        return `Think: about ${amountLabel}.`;
       }
 
       function setTime() {
@@ -591,10 +669,9 @@
 
         if (profileKey === 'none') {
           adviceEl.textContent =
-            `🌿 ${profile.baseMessage} If you keep even one windowsill plant, check soil before watering — forecast gives roughly ${round(weeklyRainInches, 2)} in rain this week outside.`;
+            `🌿 No garden? No watering needed. If you have one or two pots, just check whether the soil feels dry an inch down.`;
 
-          tipEl.textContent =
-            `Pro tip (permaculture): Practice “slow, spread, sink” with balcony catch trays or a tiny rain barrel to reuse rainwater for houseplants.`;
+          tipEl.textContent = chooseTip(ROTATING_TIPS);
           return;
         }
 
@@ -606,34 +683,56 @@
 
         let amountText = '';
         if (profileKey === 'apartment') {
-          amountText = `${round(gallonsNeeded, 1)} gal per ~10 sq ft of containers`;
+          const liters = gallonsNeeded * 3.785;
+          amountText = gallonsNeeded <= 0.4
+            ? 'one slow watering pass'
+            : `${Math.max(1, Math.round(liters / 2))} large watering-can fills`;
         } else if (profileKey === 'suburban') {
-          amountText = `${round(gallonsNeeded, 1)} gal per ~100 sq ft of garden`;
+          amountText = deficit <= 0.2
+            ? 'a light soak'
+            : `${round(gallonsNeeded, 1)} gallons per 100 sq ft`;
         } else {
-          amountText = `${Math.round(gallonsNeeded).toLocaleString()} gal per acre equivalent`;
+          amountText = deficit <= 0.2
+            ? 'a light top-off pass'
+            : `${Math.round(gallonsNeeded).toLocaleString()} gallons per acre equivalent`;
         }
+
+        const analogy = getAnalogy(profileKey, amountText);
 
         if (deficit <= 0.05) {
           adviceEl.textContent =
             `✅ Nature has you covered. Forecast rain (~${round(weeklyRainInches, 2)} in) should meet ${profile.label.toLowerCase()} needs. Skip watering and let roots chase moisture.`;
         } else if (maxRainChance >= 65 && deficit <= 0.35) {
           adviceEl.textContent =
-            `⏳ Water-light week. You likely need only ${amountText} after upcoming showers. Wait 24 hours after the next rain before topping off.`;
+            `⏳ Water-light week. Wait 24 hours after the next rain, then add only a small top-off if the soil still feels dry. ${analogy}`;
         } else {
           adviceEl.textContent =
-            `💧 Plan to add about ${amountText} this week (rain expected: ${round(weeklyRainInches, 2)} in). ${profile.baseMessage}`;
+            `💧 Add about ${amountText} this week. ${analogy}`;
         }
 
-        if (surplus > 0.4) {
-          tipEl.textContent =
-            `Pro tip (permaculture): Build small swales/contour channels or direct downspouts into infiltration zones to store this surplus rain (${round(surplus, 2)} in above baseline).`;
-        } else if (maxRainChance >= 60) {
-          tipEl.textContent =
-            `Pro tip (permaculture): Mulch 2–3 inches deep before rain so incoming moisture infiltrates and stays in the soil longer.`;
-        } else {
-          tipEl.textContent =
-            `Pro tip (permaculture): Use basin watering (or ollas for containers) so each gallon goes to roots with minimal evaporation loss.`;
-        }
+        tipEl.textContent = chooseTip(ROTATING_TIPS);
+      }
+
+      function applyWeatherData(current, daily) {
+        const { label, emoji } = wmoLookup(current.weather_code);
+        document.getElementById('w-emoji').textContent = emoji;
+        document.getElementById('w-temp').textContent = Math.round(current.temperature_2m) + '°F';
+        document.getElementById('w-condition').textContent = label;
+        document.getElementById('w-humidity').textContent = current.relative_humidity_2m + '%';
+        document.getElementById('w-wind').textContent = Math.round(current.wind_speed_10m) + ' mph';
+        document.getElementById('w-feels').textContent = Math.round(current.apparent_temperature) + '°F';
+        document.getElementById('w-extra').style.display = 'flex';
+
+        renderRainForecast(daily);
+        buildAdvice(document.getElementById('garden-type').value);
+        document.getElementById('weather-widget').classList.remove('loading');
+      }
+
+      function applyLocationData(locationData) {
+        const city = locationData.city || 'Your area';
+        const state = locationData.state || '';
+        document.getElementById('w-location').textContent = city;
+        document.getElementById('w-city').textContent = state ? `${city}, ${state}` : city;
       }
 
       async function fetchWeather(lat, lon) {
@@ -653,18 +752,7 @@
           throw new Error('Weather response missing expected fields');
         }
 
-        const { label, emoji } = wmoLookup(current.weather_code);
-        document.getElementById('w-emoji').textContent = emoji;
-        document.getElementById('w-temp').textContent = Math.round(current.temperature_2m) + '°F';
-        document.getElementById('w-condition').textContent = label;
-        document.getElementById('w-humidity').textContent = current.relative_humidity_2m + '%';
-        document.getElementById('w-wind').textContent = Math.round(current.wind_speed_10m) + ' mph';
-        document.getElementById('w-feels').textContent = Math.round(current.apparent_temperature) + '°F';
-        document.getElementById('w-extra').style.display = 'flex';
-
-        renderRainForecast(data.daily);
-        buildAdvice(document.getElementById('garden-type').value);
-        document.getElementById('weather-widget').classList.remove('loading');
+        return { current, daily: data.daily };
       }
 
       async function fetchLocation(lat, lon) {
@@ -674,14 +762,15 @@
           );
           const data = await response.json();
           const address = data.address || {};
-          const city = address.city || address.town || address.village || address.county || 'Your area';
-          const state = address.state_code || address.state || '';
-
-          document.getElementById('w-location').textContent = city;
-          document.getElementById('w-city').textContent = state ? `${city}, ${state}` : city;
+          return {
+            city: address.city || address.town || address.village || address.county || 'Your area',
+            state: address.state_code || address.state || ''
+          };
         } catch (_) {
-          document.getElementById('w-location').textContent = 'Your area';
-          document.getElementById('w-city').textContent = 'City unavailable';
+          return {
+            city: 'Your area',
+            state: ''
+          };
         }
       }
 
@@ -698,8 +787,18 @@
         }
       });
 
+      const cached = loadCache();
+      if (cached && cached.current && cached.daily) {
+        applyWeatherData(cached.current, cached.daily);
+        if (cached.location) {
+          applyLocationData(cached.location);
+        }
+      }
+
       if (!navigator.geolocation) {
-        showError('Geolocation not supported.');
+        if (!cached) {
+          showError('Geolocation not supported.');
+        }
         return;
       }
 
@@ -711,12 +810,41 @@
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
           try {
-            await Promise.all([fetchWeather(lat, lon), fetchLocation(lat, lon)]);
+            const [weatherResult, locationResult] = await Promise.allSettled([
+              fetchWeather(lat, lon),
+              fetchLocation(lat, lon)
+            ]);
+
+            const weatherData = weatherResult.status === 'fulfilled' ? weatherResult.value : null;
+            const locationData = locationResult.status === 'fulfilled' ? locationResult.value : { city: 'Your area', state: '' };
+
+            if (weatherData) {
+              applyWeatherData(weatherData.current, weatherData.daily);
+              applyLocationData(locationData);
+              saveCache({
+                current: weatherData.current,
+                daily: weatherData.daily,
+                location: locationData
+              });
+            } else if (!cached) {
+              showError('Could not load weather and rain forecast right now.');
+            }
           } catch (_) {
-            showError('Could not load weather and rain forecast right now.');
+            if (!cached) {
+              showError('Could not load weather and rain forecast right now.');
+            }
           }
         },
-        () => showError('Enable location to see your weather.')
+        () => {
+          if (!cached) {
+            showError('Enable location to see your weather.');
+          }
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 300000
+        }
       );
     })();
   </script>
