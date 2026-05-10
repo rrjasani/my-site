@@ -1324,30 +1324,6 @@ a.contact-info-value:hover { color: var(--white); }
   white-space: nowrap;
 }
 
-.weather-extra {
-  display: flex;
-  gap: 14px;
-  margin-top: 14px;
-}
-
-.weather-extra-item {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.weather-extra-label {
-  font-size: 0.58rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(245,242,238,0.25);
-}
-
-.weather-extra-val {
-  font-size: 0.78rem;
-  color: rgba(245,242,238,0.6);
-}
-
 .weather-error {
   font-size: 0.72rem;
   color: rgba(245,242,238,0.3);
@@ -1369,34 +1345,6 @@ a.contact-info-value:hover { color: var(--white); }
   margin-bottom: 14px;
 }
 
-.garden-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.garden-label {
-  font-size: 0.58rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(245,242,238,0.32);
-  white-space: nowrap;
-}
-
-.garden-select {
-  width: 100%;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: rgba(245,242,238,0.7);
-  font-size: 0.66rem;
-  letter-spacing: 0.06em;
-  padding: 7px 10px;
-  font-family: inherit;
-  outline: none;
-  cursor: none;
-}
-
 .rain-forecast-title {
   font-size: 0.6rem;
   letter-spacing: 0.16em;
@@ -1408,7 +1356,7 @@ a.contact-info-value:hover { color: var(--white); }
 .rain-list {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;
   max-height: 170px;
   overflow-y: auto;
   padding-right: 2px;
@@ -1416,19 +1364,37 @@ a.contact-info-value:hover { color: var(--white); }
 
 .rain-row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 44px 1fr 42px;
   gap: 10px;
   align-items: center;
-  font-size: 0.68rem;
+  font-size: 0.67rem;
   color: rgba(245,242,238,0.58);
-  border-bottom: 1px dashed rgba(255,255,255,0.08);
-  padding-bottom: 4px;
+  padding: 2px 0;
 }
 
-.rain-row span:last-child,
-.rain-row span:nth-child(2) {
+.rain-day {
+  color: rgba(245,242,238,0.72);
+  font-variant-numeric: tabular-nums;
+}
+
+.rain-chance {
+  text-align: right;
   color: rgba(245,242,238,0.78);
   font-variant-numeric: tabular-nums;
+}
+
+.rain-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.rain-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(200,255,0,0.5), rgba(200,255,0,0.95));
 }
 
 .garden-advice {
@@ -1439,13 +1405,6 @@ a.contact-info-value:hover { color: var(--white); }
   background: rgba(200,255,0,0.06);
   border: 1px solid rgba(200,255,0,0.14);
   padding: 12px;
-}
-
-.garden-tip {
-  margin-top: 10px;
-  font-size: 0.7rem;
-  line-height: 1.55;
-  color: rgba(245,242,238,0.56);
 }
 
 @media (max-width: 768px) {

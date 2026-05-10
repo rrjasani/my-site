@@ -38,40 +38,15 @@
         <span class="weather-time" id="w-time"></span>
       </div>
       <p class="weather-city" id="w-city">Current location weather</p>
-      <div class="weather-extra" id="w-extra" style="display:none">
-        <div class="weather-extra-item">
-          <span class="weather-extra-label">Humidity</span>
-          <span class="weather-extra-val" id="w-humidity">--%</span>
-        </div>
-        <div class="weather-extra-item">
-          <span class="weather-extra-label">Wind</span>
-          <span class="weather-extra-val" id="w-wind">-- mph</span>
-        </div>
-        <div class="weather-extra-item">
-          <span class="weather-extra-label">Feels like</span>
-          <span class="weather-extra-val" id="w-feels">--°</span>
-        </div>
-      </div>
 
       <div class="weather-divider tight"></div>
 
-      <div class="garden-controls">
-        <label class="garden-label" for="garden-type">Garden Type</label>
-        <select id="garden-type" class="garden-select" aria-label="Garden type">
-          <option value="none">No garden</option>
-          <option value="apartment">Apartment/Container</option>
-          <option value="suburban" selected>Suburban yard</option>
-          <option value="farm">Large farm/field</option>
-        </select>
-      </div>
-
-      <p class="rain-forecast-title">Rain forecast · next 7 days</p>
+      <p class="rain-forecast-title">7-day rain outlook</p>
       <div class="rain-list" id="w-rain-list">
-        <div class="rain-row"><span>Loading…</span><span>--%</span><span>-- in</span></div>
+        <div class="rain-row"><span class="rain-day">Loading...</span><div class="rain-bar"><span style="width:0%"></span></div><span class="rain-chance">--%</span></div>
       </div>
 
       <p class="garden-advice" id="w-garden-advice">Calculating watering plan…</p>
-      <p class="garden-tip" id="w-perma-tip">Pro tip: Looking at cloud patterns…</p>
     </div>
 
     <div class="hero-content">
