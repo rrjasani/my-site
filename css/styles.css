@@ -400,7 +400,8 @@ nav {
   font-size: 0.65rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(245,242,238,0.4);
+  color: rgba(245,242,238,0.85);
+  z-index: 1;
 }
 
 .about-eyebrow {
@@ -906,6 +907,33 @@ footer {
   aspect-ratio: 3/4;
   background: #111;
   overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.portrait-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  filter: saturate(0.94) contrast(1.04);
+  transform: scale(1.02);
+}
+
+.about-intro-portrait::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10,10,10,0) 58%, rgba(10,10,10,0.72) 100%);
+  pointer-events: none;
+}
+
+.about-intro-portrait::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(200,255,0,0.18);
+  transform: translate(10px, 10px);
+  pointer-events: none;
 }
 
 .about-large-heading {
@@ -1232,6 +1260,7 @@ a.contact-info-value:hover { color: var(--white); }
   .work-item-meta { flex-direction: column; align-items: flex-start; }
   .about-intro { grid-template-columns: 1fr; padding: 60px 24px; }
   .about-intro-portrait { max-height: 380px; }
+  .about-intro-portrait::after { transform: translate(6px, 6px); }
   .philosophy-grid { grid-template-columns: 1fr; }
   .about-skills-cols { grid-template-columns: 1fr; gap: 40px; }
   .about-philosophy, .about-skills-section, .about-exp-section { padding: 60px 24px; }
